@@ -1,9 +1,9 @@
 ---
 title: "Self-reported life satisfaction, 2011 to 2023"
 subtitle: "Replicating the Our World in Data Grapher"
-author: "YOUR NAME HERE" # Remember to add your name!
-date: "16-10-2024"
-theme: united
+author: "Carola Salas" # Remember to add your name!
+date: "16 October 2024"
+theme: yeti
 ---
 
 <!-- Custom HTML to add logo [DO NOT EDIT THIS SECTION] -->
@@ -36,7 +36,6 @@ cantril <-
   read_csv(here("data/happiness-cantril-ladder.csv")) %>% 
   rename(Country = Entity)
 ```
-
 ### Happiness across the world over time
 
 The World Happiness Report is a well-known source of cross-country data on self-reported life satisfaction, collected by the Gallup World Poll. The visualizations below present the ‘happiness scores’ for each country, published these reports.
@@ -45,7 +44,7 @@ The main life evaluation question asked in the poll is the Cantril Life Ladder q
 
 > “Please imagine a ladder, with steps numbered from 0 at the bottom to 10 at the top. The top of the ladder represents the best possible life for you and the bottom of the ladder represents the worst possible life for you. On which step of the ladder would you say you personally feel you stand at this time?”
 
-
+:::panel-tabset
 ## 🔢 Table
 
 **Average self-reported life satisfaction** – Cantril Ladder score (0=worst; 10=best)
@@ -56,12 +55,21 @@ The main life evaluation question asked in the poll is the Cantril Life Ladder q
 
 
 # Create table
+cantril_wider <- pivot_wider (cantril, names_from = Year, values_from = 'Cantril ladder score', id_cols = Country) 
 
-"WRITE_YOUR_CODE_HERE"
+happy_table <- cantril_wider %>% 
+  select(Country, `2011`, `2023`) %>% 
+  mutate(
+    absolute_change = round(`2023` - `2011`, 2),
+    relative_change = round((`2023` - `2011`) / `2011` * 100, 2)
+  )
+
+reactable (happy_table)
+
 ```
 
 
-## 🌎 Map
+### 🌎 Map
 
 The map plots the average answer that survey respondents provided to this question in different countries. As with the steps of the ladder, values in the map range from 0 to 10.
 
@@ -107,7 +115,21 @@ cantril %>%
 # Note that your chart will not have the ability to filter countries like the one on the Our World in Data page.
 
 # Create line chart
-"WRITE_YOUR_CODE_HERE"
+cantril_filter <- cantril %>% 
+  filter (Country %in% c("Peru", "Kenya" , "Thailand", "Australia", "Austria"))
+
+happy_plot <- ggplot(cantril_filter, aes(x = Year, y = `Cantril ladder score`, col = Country)) +
+  geom_line() +
+  scale_y_continuous(limits = c(0, 10)) +
+  labs(
+    title = "Line Graph for Happiness in Selected Countries",
+    x = "Year",
+    y = "Cantril Ladder Score"
+  ) +
+  theme_minimal()
+
+
+ggplotly (happy_plot)
 ```
 
 ## 📈 Advanced Chart
@@ -150,7 +172,7 @@ bscols(
   list(country_filter, cantril_plotly)
 )
 ```
-
+:::
 <!-- Custom javascript to set default values in the filter: -->
 <script>
 function filter_default() {
